@@ -42,3 +42,62 @@ function handleInput(row, col, input) {
   }
 
   // First entry
+  if (row === 0 && col === 0) {
+    grid[row][col] = num;
+    usedNumbers.add(num);
+    chainLength++;
+    message.textContent = "";
+    return;
+  }
+
+  // Check if the number is a factor or multiple of the previous number
+  const prevNum = grid[row][col - 1];
+  if (num !== prevNum && (num % prevNum === 0 || prevNum % num === 0)) {
+    grid[row][col] = num;
+    usedNumbers.add(num);
+    chainLength++;
+    input.classList.remove('invalid');
+    message.textContent = "";
+
+    // Move to the next cell
+    if (col < gridSize - 1) {
+      currentCol++;
+    } else {
+      currentRow++;
+      currentCol = 0;
+    }
+
+    // Check if the game is over
+    if (currentRow === gridSize) {
+      gameOver();
+      return;
+    }
+
+    // Check if there are no valid moves left
+    if (!hasValidMoves(num)) {
+      gameOver();
+      return;
+    }
+  } else {
+    input.classList.add('invalid');
+    message.textContent = "Invalid move. The number must be a factor or multiple of the previous number.";
+  }
+}
+
+function hasValidMoves(num) {
+  for (let i = 1; i <= 100; i++) {
+    if (!usedNumbers.has(i) && (i % num === 0 || num % i === 0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function gameOver() {
+  message.textContent = "Game Over! Your chain length is " + chainLength;
+  // Disable all inputs
+  const inputs = gameBoard.querySelectorAll('input');
+  inputs.forEach(input => input.disabled = true);
+}
+
+createGrid();
